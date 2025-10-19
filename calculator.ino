@@ -27,7 +27,7 @@ uint8_t cursor_pos = 0;
 
 char options[] = {
   '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-  '(', ')', '+', '-', '*', '/', '=', '<'
+  '(', ')', '+', '-', '*', '/', '%', '=', '<'
 };
 
 uint8_t option_index = 0;
@@ -198,7 +198,8 @@ int16_t calculate_term(uint8_t *current) {
   if (error_flag)
     return 0;
   
-  while (get_current_char(current) == '*' || get_current_char(current) == '/') {
+  while (get_current_char(current) == '*' || get_current_char(current) == '/'
+    || get_current_char(current) == '%') {
     switch (get_current_char(current)) {
       case '*': {
         advance(current);
@@ -225,6 +226,22 @@ int16_t calculate_term(uint8_t *current) {
         }
 
         result /= b;
+        break;
+      }
+      case '%': {
+        advance(current);
+
+        int16_t b = calculate_factor(current);
+
+        if (error_flag)
+          return 0;
+
+        if (b == 0) {
+          error_flag = true;
+          return 0;
+        }
+
+        result %= b;
         break;
       }
     }
